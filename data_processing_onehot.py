@@ -288,11 +288,8 @@ user_topics_onehot = pd.get_dummies(df['kmeans'], prefix="Cluster2")
 
 df_num_cat = pd.concat([df_categorical, df_num], axis=1)
 # merge ur files with df_num_cat and save (we should get 301 dims)
-df_results = pd.concat([df_num_cat, user_metrics_onehot, user_topics_onehot], axis=1)
+df_features = pd.concat([df_num_cat, user_metrics_onehot, user_topics_onehot], axis=1)
 
-
-
-
-# saving features and results 
-#df_features.to_csv('processed_dataset/feature.csv', index=False)
+# saving features in label encoded representation
+df_features.to_csv('processed_dataset/feature.csv', index=False)
 df_results.to_csv('processed_dataset/result.csv', index=False)

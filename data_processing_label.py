@@ -257,8 +257,7 @@ df_num_cat = pd.concat([df_categorical, df_num], axis=1)
 df_topic_metrics = pd.concat([user_metrics_features, user_topic_features], axis=1)
 df_features = pd.concat([df_num_cat, df_topic_metrics], axis=1)
 
-# can test df_features shape should be 1912070x80
-
+# saving features in label encoded representation
 df_features.to_csv('processed_dataset/features.csv', index=False)
 df_results.to_csv('processed_dataset/result.csv', index=False)
 
