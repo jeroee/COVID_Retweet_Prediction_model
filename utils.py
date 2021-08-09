@@ -7,6 +7,11 @@ import numpy as np
 from urllib.parse import urlparse
 import tldextract
 import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+from tqdm import tqdm
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
 
 # numerical features
 def z_transform(values): 
@@ -46,6 +51,9 @@ def week_of_month(dt):
 
 # match each unique user to an index
 def index_users(users):
+    '''
+    label encoding for usernames
+    '''
     users_indexed = {k: v for v, k in enumerate(users)}
     return users_indexed
 
@@ -109,12 +117,8 @@ def preprocess(df, colname):
     return df
 
 # SVD reduction
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import TruncatedSVD
-
 def tfidf_reduce(sentences, svd_dims):
-    vectorizer = TfidfVectorizer()
-    
+    vectorizer = TfidfVectorizer() 
     model = TruncatedSVD(n_components=svd_dims)
     vectors = vectorizer.fit_transform(sentences)
     col = model.fit_transform(vectors)
@@ -125,8 +129,6 @@ def tfidf_reduce(sentences, svd_dims):
 #     return denselist
 
 # TFIDF embedding
-from tqdm import tqdm
-
 def extract_text(x_train, svd_dims):
     tweet_url_publisher = []
     for urls in tqdm(x_train['url'].values):
@@ -168,7 +170,6 @@ def extract_text(x_train, svd_dims):
     return features
 
 # Kmeans clustering
-from sklearn.cluster import KMeans
 def apply_kmeans(df, cluster_num=1000):
     kmeans = KMeans(n_clusters=cluster_num)
     kmeans.fit(df.iloc[:, 0:])
@@ -176,9 +177,7 @@ def apply_kmeans(df, cluster_num=1000):
     return df
 
 # Normalizer
-from sklearn.preprocessing import MinMaxScaler
 def normalize(df):
-#     val = np.log(val + 1)
     scaler = MinMaxScaler()
     df_scaled = scaler.fit_transform(df)
     normalized_df = pd.DataFrame(df_scaled)
@@ -186,6 +185,9 @@ def normalize(df):
 
 
 def plot_curves(train_loss, val_loss, epochs):
+    '''
+    plot performance loss graph
+    '''
     e = [i+1 for i in range(epochs)]
     plt.plot(e,train_loss, label='Training Loss')
     plt.plot(e,val_loss, label='Validation Loss')
