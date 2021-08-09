@@ -1,0 +1,5 @@
+stores the raw dataset (3 files)
+
+run script in terminal to download all the raw dataset files online in tsv: bash raw_dataset.sh
+
+

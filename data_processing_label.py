@@ -11,9 +11,9 @@ import tldextract
 from urllib.parse import urlparse
 from dateutil import parser
 
-file_1 = 'Dataset/TweetsCOV19_p1_oct19-apr20.tsv'
-file_2 = 'Dataset/TweetsCOV19_p2_may20.tsv'
-file_3 = 'Dataset/TweetsCOV19_p3_jun20-dec20.tsv'
+file_1 = 'Dataset/TweetsCOV19.tsv'
+file_2 = 'Dataset/TweetsCOV19_052020.tsv.gz'
+file_3 = 'Dataset/TweetsCOV19_062020_122020.tsv'
 
 # using the smallest file to build pipeline for data pre-processing
 df = pd.read_csv(file_3, sep='\t',names=['tweet_id',
