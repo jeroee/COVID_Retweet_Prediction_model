@@ -10,7 +10,9 @@ cd Dataset
 bash raw_dataset.sh
 ```
 
-## File Details
+## Folder Details
+|folder | details |
+| --- | --- |
 | Dataset     | raw dataset tweets (download with raw_dataset.sh)    |
 |processed_dataset | processed dataset split into features.csv and results.csv|
 |trained_models | trained model file (best performing) |
