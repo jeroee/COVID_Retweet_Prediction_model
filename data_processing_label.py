@@ -250,14 +250,9 @@ df_topic_features = extract_text(df_preprocess, 5)
 
 user_topic_features= apply_kmeans(df_topic_features, 100)
 
-# User Combined (Metrics and Topic) Features (CLUSTER 3)
-# combined_df = pd.concat([user_topic_features, user_metrics_features], axis=1).drop('kmeans', 1).drop('Unnamed: 0', axis=1)
-combined_df = pd.concat([user_topic_features, user_metrics_features], axis=1).drop('kmeans', 1)
-user_combined_features = apply_kmeans(combined_df, 100)
-
 ## Merging your part using concat 
 df_num_cat = pd.concat([df_categorical, df_num], axis=1)
-df_topic_metrics = pd.concat([user_metrics_features, user_topic_features, user_combined_features], axis=1)
+df_topic_metrics = pd.concat([user_metrics_features, user_topic_features], axis=1)
 df_features = pd.concat([df_num_cat, df_topic_metrics], axis=1)
 
 # can test df_features shape should be 1912070x80
