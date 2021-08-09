@@ -236,6 +236,7 @@ df_user_change['user_friends_change'] = user_friends_change
 
 df_metrics_dynamics = pd.merge(df_user_change, df_user_metrics)
 user_metrics_features = apply_kmeans(df_metrics_dynamics, 100)
+user_metrics_features.to_csv('processed_dataset/user_metrics_features.csv', index=False)
 
 # User Topic Features (CLUSTER 2)
 df_url = df[['url']]
@@ -249,15 +250,11 @@ df_preprocess = preprocess(df_preprocess, 'hashtags')
 df_topic_features = extract_text(df_preprocess, 5)
 
 user_topic_features= apply_kmeans(df_topic_features, 100)
-
-# User Combined (Metrics and Topic) Features (CLUSTER 3)
-# combined_df = pd.concat([user_topic_features, user_metrics_features], axis=1).drop('kmeans', 1).drop('Unnamed: 0', axis=1)
-combined_df = pd.concat([user_topic_features, user_metrics_features], axis=1).drop('kmeans', 1)
-user_combined_features = apply_kmeans(combined_df, 100)
+user_topic_features.to_csv('processed_dataset/user_topics_features.csv', index=False)
 
 ## Merging your part using concat 
 df_num_cat = pd.concat([df_categorical, df_num], axis=1)
-df_topic_metrics = pd.concat([user_metrics_features, user_topic_features, user_combined_features], axis=1)
+df_topic_metrics = pd.concat([user_metrics_features, user_topic_features], axis=1)
 df_features = pd.concat([df_num_cat, df_topic_metrics], axis=1)
 
 # can test df_features shape should be 1912070x80
