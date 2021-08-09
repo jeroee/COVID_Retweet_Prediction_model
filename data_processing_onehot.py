@@ -111,16 +111,16 @@ print(f'finished df_cat')
 
 
 
-# dx include ur user metrics and topics clustering portion here
+# read from the preprocessed file from clustering
+user_metrics_features = pd.read_csv('processed_dataset/user_metrics_features.csv')
+user_topics_features = pd.read_csv('processed_dataset/user_topics_features.csv')
 
-
-
-
-
+user_metrics_onehot = pd.get_dummies(df['kmeans'], prefix="Cluster1")
+user_topics_onehot = pd.get_dummies(df['kmeans'], prefix="Cluster2")
 
 df_num_cat = pd.concat([df_categorical, df_num], axis=1)
 # merge ur files with df_num_cat and save (we should get 301 dims)
-
+df_results = pd.concat([df_num_cat, user_metrics_onehot, user_topics_onehot], axis=1)
 
 
 
