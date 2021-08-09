@@ -13,9 +13,10 @@ import tldextract
 from urllib.parse import urlparse
 from dateutil import parser
 
-file_1 = 'Dataset/TweetsCOV19.tsv'
-file_2 = 'Dataset/TweetsCOV19_052020.tsv.gz'
-file_3 = 'Dataset/TweetsCOV19_062020_122020.tsv'
+file_1 = 'Dataset/TweetsCOV19_p1_oct19-apr20.tsv'
+file_2 = 'Dataset/TweetsCOV19_p2_may20.tsv'
+file_3 = 'Dataset/TweetsCOV19_p3_jun20-dec20.tsv'
+clustersize = 100
 
 # using the smallest file to build pipeline for data pre-processing
 df = pd.read_csv(file_2, sep='\t',names=['tweet_id',
@@ -112,10 +113,177 @@ print(f'finished df_cat')
 
 
 # read from the preprocessed file from clustering
-user_metrics_features = pd.read_csv('processed_dataset/user_metrics_features.csv')
-user_topics_features = pd.read_csv('processed_dataset/user_topics_features.csv')
+## User Metrics (CLUSTER 1)
+user_follow_mean_features = np.zeros(len(df))
+user_follow_std_features = np.zeros(len(df))
+user_friend_mean_features = np.zeros(len(df))
+user_friend_std_features = np.zeros(len(df))
+user_favorite_mean_features = np.zeros(len(df))
+user_favorite_std_features = np.zeros(len(df))
 
+user_entities_unique_features = np.zeros(len(df))
+user_mentions_unique_features = np.zeros(len(df))
+user_hashtags_unique_features = np.zeros(len(df))
+user_urls_unique_features = np.zeros(len(df))
+
+user_folos_change = np.zeros(len(df))
+user_friends_change = np.zeros(len(df))
+user_days_change = np.zeros(len(df))
+user_folos_change = np.array(user_folos_change)
+user_friends_change = np.array(user_friends_change)
+user_days_change = np.array(user_days_change)
+
+user_num = df['username'].nunique()
+count = 0
+for idx, (username, X_user) in tqdm(enumerate(df.groupby('username')), total=user_num):
+    X_user = X_user.sort_values('timestamp', ascending=True)
+    user_index = X_user.index.tolist()
+    
+    # User metric categories
+    follow_tmp = []
+    friend_tmp = []
+    fav_tmp = []
+    entities_tmp, mentions_tmp, hashtags_tmp, urls_tmp = [], [], [], []
+    
+    rows = []
+    
+    for fol, fri, fav, entities, mentions, hashtags, urls in X_user[['followers', 'friends', 'favourites', 'entities', 'mentions', 'hashtags', 'url']].values:
+        follow_tmp.append(fol)
+        friend_tmp.append(fri)
+        fav_tmp.append(fav)
+        entities_tmp.extend(entities)
+        if type(mentions) == float:
+            mentions_tmp.extend("null;")
+        elif type(mentions) != float:
+            mentions_tmp.extend(mentions)
+        if type(hashtags) == float:
+            hashtags_tmp.extend("null;")
+        elif type(hashtags) != float:
+            hashtags_tmp.extend(hashtags)
+        if type(urls) == float:
+            urls_tmp.extend("null;")
+        elif type(urls) != float:
+            urls_tmp.extend(urls)
+    
+    features = pd.DataFrame()
+    # Followers
+    follow_tmp = np.array(follow_tmp)
+    features['user_follow_mean'] = [follow_tmp.mean()]
+    features['user_follow_std'] = [follow_tmp.std()]
+    # Friends
+    friend_tmp = np.array(friend_tmp)
+    features['user_friend_mean'] = [friend_tmp.mean()]
+    features['user_friend_std'] = [friend_tmp.std()]
+    # Favourites
+    fav_tmp = np.array(fav_tmp)
+    features['user_favourite_mean'] = [fav_tmp.mean()]
+    features['user_favourite_std'] = [fav_tmp.std()]
+    
+    features['user_entities_unique'] = len(set(entities_tmp))
+    features['user_mentions_unique'] = len(set(mentions_tmp))
+    features['user_hashtags_unique'] = len(set(hashtags_tmp))
+    features['user_urls_unique'] = len(set(urls_tmp))
+    count += 1
+    
+    # Assign to whole user df
+    user_follow_mean_features[user_index] = features['user_follow_mean']
+    user_follow_std_features[user_index] = features['user_follow_std']
+    user_friend_mean_features[user_index] = features['user_friend_mean']
+    user_friend_std_features[user_index] = features['user_friend_std']
+    user_favorite_mean_features[user_index] = features['user_favourite_mean']
+    user_favorite_std_features[user_index] = features['user_favourite_std']
+
+    user_entities_unique_features[user_index] = features['user_entities_unique']
+    user_mentions_unique_features[user_index] = features['user_mentions_unique']
+    user_hashtags_unique_features[user_index] = features['user_hashtags_unique']
+    user_urls_unique_features[user_index] = features['user_urls_unique']
+
+# User Dynamics (CLUSTER 1)
+df_user_metrics = pd.DataFrame()
+
+df_user_metrics ['user_friend_mean'] = user_friend_mean_features
+df_user_metrics ['user_friend_std'] = user_friend_std_features
+df_user_metrics ['user_follow_mean'] = user_follow_mean_features
+df_user_metrics ['user_follow_std'] = user_follow_std_features
+df_user_metrics ['user_favorite_mean'] = user_favorite_mean_features
+df_user_metrics ['user_favorite_std'] = user_favorite_std_features
+
+df_user_metrics ['user_entities_unique'] = user_entities_unique_features
+df_user_metrics ['user_mentions_unique'] = user_mentions_unique_features
+df_user_metrics ['user_hashtags_unique'] = user_hashtags_unique_features
+df_user_metrics ['user_urls_unique'] = user_urls_unique_features
+
+df_changes = df[['username', 'timestamp', 'followers', 'friends']]
+datetime_objects = [datetime.strptime(date, "%a %b %d %X %z %Y") for date in df_changes['timestamp'].tolist()]
+df_changes['weekday'] = [date.weekday() for date in datetime_objects]
+df_changes['hour'] = [date.hour for date in datetime_objects]
+df_changes['day'] = [date.day for date in datetime_objects]
+df_changes['week_of_month'] = [week_of_month(date) for date in datetime_objects]
+user_num = df['username'].nunique()
+timestamp = []
+
+for idx, (username, X_user) in tqdm(enumerate(df_changes.groupby('username')), total=user_num):
+    X_user = X_user.sort_values('timestamp', ascending=True)
+    user_index = X_user.index.tolist()
+    folos_temp = []
+    friends_temp = []
+    user_dates_temp = []
+    user_folos_change_temp = [0]
+    user_friends_change_temp = [0]
+    user_days_change_temp = [0]
+    user_months_change_temp = [0]
+    temp_date = ''
+    rows = ''
+    for dt, folo, friend in X_user[['timestamp', 'followers', 'friends']].values:
+        parsed_dt = parser.parse(dt)
+        temp_date = parsed_dt
+        folos_temp.append(folo)
+        friends_temp.append(friend)
+        user_dates_temp.append(parsed_dt)
+            
+        if len(folos_temp) > 1:
+            user_folos_change_temp.append(folo - folos_temp[-2])
+            user_friends_change_temp.append(friend - friends_temp[-2])
+            user_days_change_temp.append((parsed_dt - user_dates_temp[-2]).days)
+
+    increment_features = pd.DataFrame()
+    increment_features['user_days_change_temp'] = user_days_change_temp
+    increment_features['user_folos_change_temp'] = user_folos_change_temp
+    increment_features['user_friends_change_temp'] = user_friends_change_temp
+    user_days_change[user_index] = increment_features['user_days_change_temp']
+    user_folos_change[user_index] = increment_features['user_folos_change_temp']
+    user_friends_change[user_index] = increment_features['user_friends_change_temp']
+    
+df_user_change = pd.DataFrame()
+df_user_change['user_days_change'] = user_days_change
+df_user_change['user_folos_change'] = user_folos_change
+df_user_change['user_friends_change'] = user_friends_change
+
+
+df_metrics_dynamics = pd.concat([df_user_change, df_user_metrics], axis=1)
+
+# normalizing
+column_names = df_metrics_dynamics.columns.tolist()
+arr = df_metrics_dynamics.to_numpy()
+scaler = MinMaxScaler()
+arr_norm = scaler.fit_transform(arr)
+df_metrics_dynamics = pd.DataFrame(data = arr_norm, columns = column_names)
+
+user_metrics_features = apply_kmeans(df_metrics_dynamics, clustersize)
 user_metrics_onehot = pd.get_dummies(df['kmeans'], prefix="Cluster1")
+
+
+# User Topic Features (CLUSTER 2)
+df_url = df[['url']]
+df_url['url'].values
+df_url_split = factorise_url(df_url)
+df_multi_cat = df[['entities', 'mentions', 'hashtags']]
+df_multi_cat_final = df_multi_cat.join(df_url_split)
+df_preprocess = preprocess_entities(df_multi_cat_final)
+df_preprocess = preprocess(df_preprocess, 'mentions')
+df_preprocess = preprocess(df_preprocess, 'hashtags')
+df_topic_features = extract_text(df_preprocess, 5)
+user_topic_features = apply_kmeans(df_topic_features, clustersize)
 user_topics_onehot = pd.get_dummies(df['kmeans'], prefix="Cluster2")
 
 df_num_cat = pd.concat([df_categorical, df_num], axis=1)
