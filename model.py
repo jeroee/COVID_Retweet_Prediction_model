@@ -14,6 +14,9 @@ import pytz
 import matplotlib.pyplot as plt
 
 class nn_Regression(nn.Module):
+    '''
+    defining model architecture
+    '''
     def __init__(self,input_features, dropout, model_name):
         super(nn_Regression,self).__init__()
         self.fc1 = nn.Linear(input_features,512)
@@ -57,6 +60,9 @@ class nn_Regression(nn.Module):
 
 # mean square log eror
 class MSLE_Loss(nn.Module):
+    '''
+    defining msle loss using mse loss
+    '''
     def __init__(self):
         super().__init__()
         self.mse = nn.MSELoss()

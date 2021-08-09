@@ -10,20 +10,35 @@ import matplotlib.pyplot as plt
 
 # numerical features
 def z_transform(values): 
+    '''
+    z transformation (list)
+    '''
     avg = statistics.mean(values)
     std = statistics.stdev(values)
     return [((value-avg)/std) for value in values]
 
 def log_transform(values):
+    '''
+    log transformation (list)
+    '''
     return [math.log(value+1) for value in values]
 
 def cdf_transform(values):
+    '''
+    cdf transformation (list)
+    '''
     return norm.cdf(values)
 
 def rank_transform(values):
+    '''
+    rank transformation (list)
+    '''
     return list(map({j: i for i, j in enumerate(sorted(set(values)))}.get, values))
 
 def week_of_month(dt):
+    '''
+    getting the week of the month 0-4 (int) 
+    '''
     first_day = dt.replace(day=1)
     dom = dt.day
     adjusted_dom = dom + first_day.weekday()
@@ -170,7 +185,7 @@ def normalize(df):
     return normalized_df
 
 
-def plot_curves(graph_name, train_loss, val_loss, epochs):
+def plot_curves(train_loss, val_loss, epochs):
     e = [i+1 for i in range(epochs)]
     plt.plot(e,train_loss, label='Training Loss')
     plt.plot(e,val_loss, label='Validation Loss')
@@ -180,5 +195,5 @@ def plot_curves(graph_name, train_loss, val_loss, epochs):
     plt.xlabel('epoch', color='black')
     plt.ylabel('loss',color='black')
     plt.tick_params(colors='black')
-    plt.savefig(graph_name,dpi=100,bbox_inches = 'tight')
+    # plt.savefig(graph_name,dpi=100,bbox_inches = 'tight')
     plt.show()
