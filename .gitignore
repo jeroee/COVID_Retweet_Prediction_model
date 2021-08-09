@@ -1,3 +1,4 @@
 !Dataset
 Dataset/*
 !Dataset/note.txt
+!Dataset/raw_dataset.sh
