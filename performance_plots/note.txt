@@ -1,1 +1,0 @@
-saves all the loss graphs for the models trained in type .jpg
