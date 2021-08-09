@@ -12,21 +12,13 @@ bash raw_dataset.sh
 
 ## File Details
 | Dataset     | raw dataset tweets (download with raw_dataset.sh)    |
-|------------|-------------|
 |processed_dataset | processed dataset split into features.csv and results.csv|
-|------------|-------------|
 |trained_models | trained model file (best performing) |
-|------------|-------------|
 |performance_plots | final perforamnce loss graph for our best performing model |
-|------------|-------------|
 |custom_dataset.py | converts csv files into custome dataset to be used by pytorch|
-|------------|-------------|
 |data_processing_onehot.py|processes raw dataset tweers into processed dataset features.csv and results.csv |
-|------------|-------------|
 |model.py|model architecture definition and model training functions|
-|------------|-------------|
 |utils.py |common functions that is used throughout the pipeline|
-|------------|-------------|
 |main.ipynb  |pipeline to take in processed data features.csv and results.csv to train model|
 
 ```
